@@ -1,8 +1,9 @@
-const { normalizeURL, getUrlFromHTML } = require('./crawl.js')
+const { normalizeURL, getUrlFromHTML, crawlPage } = require('./crawl.js')
 const {test, expect} = require('@jest/globals')
 
 normalizeURL_tests()
 getUrlFromHTML_tests()
+crawlPage_tests()
 
 function normalizeURL_tests(){
     test('normalizeURL strip protocol', ()=>{
@@ -126,3 +127,13 @@ function getUrlFromHTML_tests(){
     
 }
 
+function crawlPage_tests(){
+    test('crawlPage offline', async ()=>{
+        const input = 'https://ajpf44.github.io'
+        const actual = await crawlPage(input)
+        const expected = -2
+
+        expect(actual).toEqual(expected)
+
+    })
+}
