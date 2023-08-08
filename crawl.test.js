@@ -3,7 +3,6 @@ const {test, expect} = require('@jest/globals')
 
 normalizeURL_tests()
 getUrlFromHTML_tests()
-crawlPage_tests()
 
 function normalizeURL_tests(){
     test('normalizeURL strip protocol', ()=>{
@@ -75,7 +74,7 @@ function getUrlFromHTML_tests(){
         </body>
         </html>
         `
-        const secondInput = 'http://blog.boot.dev'
+        const secondInput = 'http://blog.boot.dev/'
         const actual = getUrlFromHTML(firstInput, secondInput)
         const expected = ['http://blog.boot.dev/path/']
 
@@ -125,15 +124,4 @@ function getUrlFromHTML_tests(){
         expect(actual).toEqual(expected)
     })
     
-}
-
-function crawlPage_tests(){
-    test('crawlPage offline', async ()=>{
-        const input = 'https://ajpf44.github.io'
-        const actual = await crawlPage(input)
-        const expected = -2
-
-        expect(actual).toEqual(expected)
-
-    })
 }

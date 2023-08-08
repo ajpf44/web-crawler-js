@@ -1,36 +1,55 @@
 const { JSDOM } = require('jsdom')
 
-async function crawlPage(url){
+async function crawlPage(baseURL, currentURL, pages){
+    const baseURL_obj = new URL(baseURL)
+    const currentURL_obj = new URL(currentURL)
+
+    if(baseURL_obj.hostname !== currentURL_obj.hostname)return pages
+    
+    
+    const normalize_currentURL = normalizeURL(currentURL)
+    if(pages[normalize_currentURL] > 0) {
+        ++pages[normalize_currentURL]
+        return pages
+    }
+
+    pages[normalize_currentURL] = 1
+
+    console.log(`starting crawling: ${currentURL}`)
     try {
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors'
-        })
+        const response = await fetch(currentURL)
         
         if (response.status > 399){
-            console.log(`Error in fetch with the status codes: ${response.status}, on url: ${url}`)
-            return -2
+            console.log(`Error in fetch with the status codes: ${response.status}, on url: ${currentURL}`)
+            return pages
         }
 
         const contentType = response.headers.get('content-type')
-        console.log(contentType)
         if(!contentType.includes('text/html')){
-            console.log(`Non html response, content-type: ${contentType}, on url: ${url}`)
-            return -3
+            console.log(`Non html response, content-type: ${contentType}, on url: ${currentURL}`)
+            return pages
         }
 
-        console.log(getUrlFromHTML(await response.text(), url))
+        const htmlBody = await response.text()
+        const nextUrls = getUrlFromHTML(htmlBody, currentURL)
+        for(nURL of nextUrls){
+            pages = await crawlPage(baseURL, nURL, pages)
+        }
     } catch (error) {
-        console.log(`error in fetch: ${error}, on url ${url}`)
+        console.log(`error in fetch: ${error}, on url ${currentURL}`)
     }
+
+    return pages
 }
 
 function normalizeURL(urlS){
     const nURL = new URL(urlS)
-    const pURL = `${nURL.host}${nURL.pathname}`
-    const finalURL =  pURL.endsWith('/')?pURL.slice(0, -1):pURL
+    let pURL = `${nURL.host}${nURL.pathname}`
+    while(pURL.endsWith('/')){
+        pURL = pURL.slice(0, -1)
+    }
 
-    return finalURL
+    return pURL
 }
 
 function getUrlFromHTML(htmlBody, baseURL){
@@ -43,11 +62,18 @@ function getUrlFromHTML(htmlBody, baseURL){
     for(const tag of allTags_a){
         let url = null
 
-        if(tag.href[0] ==='/') url =`${baseURL}${tag.href}`
+        
+        if(tag.href[0] ==='/'){
+            if(baseURL.endsWith('/')){
+                url = `${baseURL.slice(0, baseURL.length-1)}${tag.href}`
+            }else{
+                url = baseURL+tag.href
+            }
+        }
         else url = tag.href
 
         try{
-            new URL(url)
+            const newURL = new URL(url)
             urls.push(url)
         }catch{
             console.log(`invalid url: '${url}', from: ${baseURL}`)
