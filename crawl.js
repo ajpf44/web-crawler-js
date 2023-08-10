@@ -4,8 +4,9 @@ async function crawlPage(baseURL, currentURL, pages){
     const baseURL_obj = new URL(baseURL)
     const currentURL_obj = new URL(currentURL)
 
-    if(baseURL_obj.hostname !== currentURL_obj.hostname)return pages
-    
+    if(baseURL_obj.hostname !== currentURL_obj.hostname){
+        return pages
+    }
     
     const normalize_currentURL = normalizeURL(currentURL)
     if(pages[normalize_currentURL] > 0) {
@@ -52,9 +53,8 @@ function normalizeURL(urlS){
     return pURL
 }
 
-function getUrlFromHTML(htmlBody, baseURL){
+/* function getUrlFromHTML(htmlBody, baseURL){
     const urls = [];
-
     const dom = new JSDOM(htmlBody)
 
     const allTags_a=  dom.window.document.getElementsByTagName('a')
@@ -81,7 +81,7 @@ function getUrlFromHTML(htmlBody, baseURL){
     }
 
     return urls;
-}
+} */
 
 module.exports = {
     normalizeURL,
