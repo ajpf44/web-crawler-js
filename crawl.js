@@ -46,6 +46,7 @@ async function crawlPage(baseURL, currentURL, pages){
 function normalizeURL(urlS){
     const nURL = new URL(urlS)
     let pURL = `${nURL.host}${nURL.pathname}`
+
     while(pURL.endsWith('/')){
         pURL = pURL.slice(0, -1)
     }
@@ -53,35 +54,38 @@ function normalizeURL(urlS){
     return pURL
 }
 
-/* function getUrlFromHTML(htmlBody, baseURL){
-    const urls = [];
+function getUrlFromHTML(htmlBody, baseURL){
+    const urls =[]
     const dom = new JSDOM(htmlBody)
 
-    const allTags_a=  dom.window.document.getElementsByTagName('a')
+    const aElements=  dom.window.document.getElementsByTagName('a')
     
-    for(const tag of allTags_a){
+    for(const link of aElements){
         let url = null
-
         
-        if(tag.href[0] ==='/'){
-            if(baseURL.endsWith('/')){
-                url = `${baseURL.slice(0, baseURL.length-1)}${tag.href}`
-            }else{
-                url = baseURL+tag.href
-            }
-        }
-        else url = tag.href
+        if(link.href[0] == '/'){
+            let u = new URL(baseURL)
+            u.pathname = link.href
 
-        try{
-            const newURL = new URL(url)
-            urls.push(url)
-        }catch{
-            console.log(`invalid url: '${url}', from: ${baseURL}`)
-        }
+            url = u.href
+        }else url = link.href
+
+        if(isValidUrl(url))
+            urls.push(url);
     }
 
     return urls;
-} */
+}
+
+function isValidUrl(url){
+    try{
+        const n = new URL(url)
+        return true
+    }catch(error){
+        console.log(`invalid URL: ${url}`)
+        return false
+    }
+}
 
 module.exports = {
     normalizeURL,

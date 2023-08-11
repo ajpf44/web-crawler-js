@@ -2,6 +2,7 @@ function printReport(pages){
     console.log(
         `===============\n`+
         `REPORT\n`+
+        `was found ${Object.entries(pages).length} urls\n`+
         `===============`
     )
 
